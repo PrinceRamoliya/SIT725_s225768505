@@ -47,7 +47,7 @@ function loadTasks() {
 
             li.innerHTML = `
                 <span>${task.topic} (${task.duration} mins)</span>
-                <button type="button" onclick="addTask()"> Add Task </button>
+                <button onclick="addTask()">Add Task</button>
             `;
 
             list.appendChild(li);
