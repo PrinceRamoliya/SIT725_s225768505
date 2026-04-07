@@ -2,11 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config();
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
+let isDatabaseConnected = false;
 
 app.use(cors());
 app.use(express.json());
@@ -18,8 +19,26 @@ if (!MONGO_URI) {
 }
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log("MongoDB Connected"))
-    .catch((err) => console.error("MongoDB connection failed:", err.message));
+    .then(() => {
+        isDatabaseConnected = true;
+        console.log("MongoDB Connected");
+        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    })
+    .catch((err) => {
+        console.error("MongoDB connection failed:", err.message);
+        process.exit(1);
+    });
+
+app.use((req, res, next) => {
+    if (!isDatabaseConnected) {
+        return res.status(503).json({
+            message: "Database is not connected",
+            error: "Check the MongoDB username, password, and network access in your MONGO_URI"
+        });
+    }
+
+    next();
+});
 
 const BookSchema = new mongoose.Schema({
     title: { type: String, required: true, trim: true },
@@ -63,4 +82,3 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "Public", "index.html"));
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

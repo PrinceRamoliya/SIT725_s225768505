@@ -10,7 +10,7 @@ async function requestJson(url, options = {}) {
     try {
         res = await fetch(url, options);
     } catch (err) {
-        throw new Error("Cannot reach the server. Open the app from http://localhost:3001 and make sure npm start is running.");
+        throw new Error("Cannot reach the server. Open the app from http://localhost:3000 and make sure the Node server is running.");
     }
 
     let data = null;
@@ -21,7 +21,9 @@ async function requestJson(url, options = {}) {
     }
 
     if (!res.ok) {
-        const message = data?.message || `Request failed with status ${res.status}`;
+        const message = data?.error
+            ? `${data.message}: ${data.error}`
+            : data?.message || `Request failed with status ${res.status}`;
         throw new Error(message);
     }
 
