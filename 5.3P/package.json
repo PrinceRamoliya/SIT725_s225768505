@@ -1,0 +1,18 @@
+{
+  "name": "5.3p",
+  "version": "1.0.0",
+  "description": "SIT725 5.3P books catalog with MongoDB",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "mongoose": "^8.13.2"
+  }
+}
