@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books Catalog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="page-shell">
+        <section class="hero">
+            <p class="student-marker">Developed by 225768505</p>
+            <h1>Books Catalog</h1>
+            <p>Browse the seeded catalogue, then use the safe-write forms to create or update books with server-side validation.</p>
+            <button id="load-books-btn" type="button">Get All Books</button>
+            <p id="status-message">Click the button to load books from the database.</p>
+        </section>
+
+        <section class="grid">
+            <div class="panel">
+                <h2>Book List</h2>
+                <div id="book-container">
+                    <p>No books loaded yet.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Book Details</h2>
+                <div id="book-details">
+                    <p>Select a book after loading the catalog.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid forms-grid">
+            <form id="create-form" class="panel form-panel">
+                <h2>Create Book</h2>
+                <div class="field-grid">
+                    <label>Book ID<input name="id" type="text" placeholder="b100" required></label>
+                    <label>Title<input name="title" type="text" required></label>
+                    <label>Author<input name="author" type="text" required></label>
+                    <label>Year<input name="year" type="number" min="1450" required></label>
+                    <label>Genre
+                        <select name="genre" required>
+                            <option value="Science Fiction">Science Fiction</option>
+                            <option value="Classic">Classic</option>
+                            <option value="Historical Fiction">Historical Fiction</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Other" selected>Other</option>
+                        </select>
+                    </label>
+                    <label>Price (AUD)<input name="price" type="number" min="0.5" max="500" step="0.01" required></label>
+                    <label class="full-width">Summary<textarea name="summary" rows="4" required></textarea></label>
+                </div>
+                <button type="submit">Create Book</button>
+                <p id="create-message" class="form-message">Submit the form to create a new book.</p>
+            </form>
+
+            <form id="update-form" class="panel form-panel">
+                <h2>Update Book</h2>
+                <div class="field-grid">
+                    <label>Existing Book ID<input name="targetId" type="text" placeholder="b1" required></label>
+                    <label>Title<input name="title" type="text" required></label>
+                    <label>Author<input name="author" type="text" required></label>
+                    <label>Year<input name="year" type="number" min="1450" required></label>
+                    <label>Genre
+                        <select name="genre" required>
+                            <option value="Science Fiction">Science Fiction</option>
+                            <option value="Classic">Classic</option>
+                            <option value="Historical Fiction">Historical Fiction</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Other" selected>Other</option>
+                        </select>
+                    </label>
+                    <label>Price (AUD)<input name="price" type="number" min="0.5" max="500" step="0.01" required></label>
+                    <label class="full-width">Summary<textarea name="summary" rows="4" required></textarea></label>
+                </div>
+                <button type="submit">Update Book</button>
+                <p id="update-message" class="form-message">Use the ID of an existing book to test safe updates.</p>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        const loadBooksBtn = document.getElementById("load-books-btn");
+        const statusMessage = document.getElementById("status-message");
+        const bookContainer = document.getElementById("book-container");
+        const bookDetails = document.getElementById("book-details");
+        const createForm = document.getElementById("create-form");
+        const updateForm = document.getElementById("update-form");
+        const createMessage = document.getElementById("create-message");
+        const updateMessage = document.getElementById("update-message");
+
+        const formatPrice = (price) => {
+            const amount = Number(price);
+            return Number.isNaN(amount) ? "N/A" : amount.toFixed(2);
+        };
+
+        const renderBookDetails = (book) => {
+            bookDetails.innerHTML = `
+                <div class="detail-block">
+                    <h3>${book.title}</h3>
+                    <p><strong>ID:</strong> ${book.id}</p>
+                    <p><strong>Author:</strong> ${book.author}</p>
+                    <p><strong>Year:</strong> ${book.year}</p>
+                    <p><strong>Genre:</strong> ${book.genre}</p>
+                    <p><strong>Price:</strong> AUD ${formatPrice(book.price)}</p>
+                    <p><strong>Summary:</strong> ${book.summary}</p>
+                </div>
+            `;
+        };
+
+        const loadBookDetails = async (bookId) => {
+            bookDetails.innerHTML = '<p>Loading book details...</p>';
+
+            try {
+                const response = await fetch(`/api/books/${bookId}`);
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const book = await response.json();
+                renderBookDetails(book);
+            } catch (error) {
+                console.error("Error fetching book details:", error);
+                bookDetails.innerHTML = '<p>Unable to load book details.</p>';
+            }
+        };
+
+        const formToPayload = (form) => {
+            const data = new FormData(form);
+            return {
+                title: data.get("title").trim(),
+                author: data.get("author").trim(),
+                year: Number(data.get("year")),
+                genre: data.get("genre"),
+                summary: data.get("summary").trim(),
+                price: data.get("price")
+            };
+        };
+
+        const showFormMessage = (element, message, isError = false) => {
+            element.textContent = message;
+            element.className = isError ? "form-message error" : "form-message success";
+        };
+
+        const handleWriteResponse = async (response) => {
+            const data = await response.json().catch(() => ({}));
+            if (response.ok) {
+                return { ok: true, data };
+            }
+
+            const errors = Array.isArray(data.errors) ? ` ${data.errors.join(" ")}` : "";
+            return {
+                ok: false,
+                message: `${data.message || "Request failed."}${errors}`.trim()
+            };
+        };
+
+        const loadBooks = async () => {
+            statusMessage.textContent = "Loading books from MongoDB...";
+            bookContainer.innerHTML = '<p>Loading catalog...</p>';
+            bookDetails.innerHTML = '<p>Select a book after loading the catalog.</p>';
+
+            try {
+                const response = await fetch("/api/books");
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const books = await response.json();
+                bookContainer.innerHTML = "";
+
+                if (books.length === 0) {
+                    statusMessage.textContent = "Connected to the database, but no books were found.";
+                    bookContainer.innerHTML = '<p>No books found in the database.</p>';
+                    return;
+                }
+
+                books.forEach((book) => {
+                    const bookButton = document.createElement("button");
+                    bookButton.type = "button";
+                    bookButton.className = "book-card";
+                    bookButton.innerHTML = `
+                        <span class="book-title">${book.title}</span>
+                        <span class="author">AUD ${formatPrice(book.price)}</span>
+                    `;
+                    bookButton.addEventListener("click", () => loadBookDetails(book.id));
+                    bookContainer.appendChild(bookButton);
+                });
+
+                statusMessage.textContent = `Loaded ${books.length} books from the database.`;
+            } catch (error) {
+                console.error("Error fetching books:", error);
+                statusMessage.textContent = "Failed to load books from the database.";
+                bookContainer.innerHTML = '<p>Unable to load books.</p>';
+            }
+        };
+
+        createForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const data = new FormData(createForm);
+            const payload = {
+                id: data.get("id").trim(),
+                ...formToPayload(createForm)
+            };
+
+            try {
+                const response = await fetch("/api/books", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const result = await handleWriteResponse(response);
+
+                if (!result.ok) {
+                    showFormMessage(createMessage, result.message, true);
+                    return;
+                }
+
+                showFormMessage(createMessage, `Created ${result.data.title} successfully.`);
+                createForm.reset();
+                loadBooks();
+            } catch (error) {
+                console.error("Error creating book:", error);
+                showFormMessage(createMessage, "Unable to create the book right now.", true);
+            }
+        });
+
+        updateForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const data = new FormData(updateForm);
+            const targetId = data.get("targetId").trim();
+            const payload = formToPayload(updateForm);
+
+            try {
+                const response = await fetch(`/api/books/${targetId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const result = await handleWriteResponse(response);
+
+                if (!result.ok) {
+                    showFormMessage(updateMessage, result.message, true);
+                    return;
+                }
+
+                showFormMessage(updateMessage, `Updated ${result.data.title} successfully.`);
+                loadBooks();
+                renderBookDetails(result.data);
+            } catch (error) {
+                console.error("Error updating book:", error);
+                showFormMessage(updateMessage, "Unable to update the book right now.", true);
+            }
+        });
+
+        loadBooksBtn.addEventListener("click", loadBooks);
+    </script>
+</body>
+</html>

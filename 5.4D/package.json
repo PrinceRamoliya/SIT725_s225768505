@@ -1,0 +1,19 @@
+{
+  "name": "5.4d",
+  "version": "1.0.0",
+  "description": "SIT725 5.4D books catalog with safe-write validation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "validate": "node validation-tests.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "mongoose": "^8.13.2"
+  }
+}
