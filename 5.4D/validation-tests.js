@@ -1,29 +1,5 @@
-/**
- * SIT725 – 5.4D Validation Tests (MANDATORY TEMPLATE)
- *
- * HOW TO RUN: (Node.js 18+ is required)
- *   1. Start MongoDB
- *   2. Start your server (npm start)
- *   3. node validation-tests.js
- *
- * DO NOT MODIFY:
- *   - Output format (TEST|, SUMMARY|, COVERAGE|)
- *   - test() function signature
- *   - Exit behaviour
- *   - coverageTracker object
- *   - Logging structure
- *
- * YOU MUST:
- *   - Modify makeValidBook() to satisfy your schema rules
- *   - Add sufficient tests to meet coverage requirements
- */
-
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 const API_BASE = "/api/books";
-
-// =============================
-// INTERNAL STATE (DO NOT MODIFY)
-// =============================
 
 const results = [];
 
@@ -39,10 +15,6 @@ const coverageTracker = {
   UNKNOWN_UPDATE: 0,
   IMMUTABLE: 0,
 };
-
-// =============================
-// OUTPUTS FORMAT (DO NOT MODIFY)
-// =============================
 
 function logHeader(uniqueId) {
   console.log("SIT725_VALIDATION_TESTS");
@@ -80,9 +52,6 @@ function logCoverage() {
   );
 }
 
-// =============================
-// HTTP HELPER
-// =============================
 
 async function http(method, path, body) {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -95,9 +64,6 @@ async function http(method, path, body) {
   return { status: res.status, text };
 }
 
-// =============================
-// TEST REGISTRATION FUNCTION
-// =============================
 
 async function test({ id, name, method, path, expected, body, tags }) {
 
@@ -117,10 +83,6 @@ async function test({ id, name, method, path, expected, body, tags }) {
     }
   });
 }
-
-// =============================
-// STUDENT MUST MODIFY THESE
-// =============================
 
 function makeValidBook(id) {
   return {
@@ -144,10 +106,6 @@ function makeValidUpdate() {
     price: "10.50"
   };
 }
-
-// =============================
-// REQUIRED BASE TESTS (DO NOT REMOVE)
-// =============================
 
 async function run() {
 
@@ -212,20 +170,6 @@ async function run() {
     tags: ["UPDATE_FAIL", "UNKNOWN_UPDATE"]
   });
 
-  // =====================================
-  // STUDENTS MUST ADD ADDITIONAL TESTS
-  // =====================================
-  //
-  // Add tests covering:
-  // - REQUIRED
-  // - TYPE
-  // - BOUNDARY
-  // - LENGTH
-  // - TEMPORAL
-  // - UPDATE_FAIL
-  //
-  // Each test must include appropriate tags.
-  //
 
   await test({
     id: "T06",
