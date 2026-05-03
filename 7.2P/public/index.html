@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIT725 Live Class Poll</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="panel">
+      <h1>Live Class Poll</h1>
+      <p>Choose how you feel about today's socket activity.</p>
+
+      <div class="buttons">
+        <button data-choice="ready">I am ready</button>
+        <button data-choice="needHelp">Need help</button>
+        <button data-choice="confused">Confused</button>
+      </div>
+
+      <div class="results">
+        <div>
+          <span id="ready">0</span>
+          <p>Ready</p>
+        </div>
+        <div>
+          <span id="needHelp">0</span>
+          <p>Need help</p>
+        </div>
+        <div>
+          <span id="confused">0</span>
+          <p>Confused</p>
+        </div>
+      </div>
+
+      <button class="reset" id="resetPoll">Reset poll</button>
+    </section>
+
+    <section class="panel">
+      <h2>Class Message</h2>
+      <form id="messageForm">
+        <input id="messageInput" type="text" placeholder="Type a short message" maxlength="80">
+        <button type="submit">Send</button>
+      </form>
+
+      <ul id="messages"></ul>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="scripts.js"></script>
+</body>
+</html>

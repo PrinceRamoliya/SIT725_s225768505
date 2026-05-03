@@ -1,0 +1,15 @@
+{
+  "name": "sit725-7-2p",
+  "version": "1.0.0",
+  "description": "Simple Socket.IO classroom poll app for SIT725 task 7.2P",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}
